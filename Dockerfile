@@ -1,5 +1,5 @@
-FROM node:7.8.0
+FROM node:16.0.0
 WORKDIR /opt
 ADD . /opt
 RUN npm install
-ENTRYPOINT npm run start
+ENTRYPOINT ["sh", "-c", "npm run start -- --port ${PORT}"]
