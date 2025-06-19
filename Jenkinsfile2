@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    
+    parameters {
+        choice(name: 'TARGET_ENV', choices: ['main', 'dev'], description: 'Select target environment')
+        string(name: 'IMAGE_TAG', defaultValue: 'v1.0', description: 'Docker image tag to deploy')
+    }
+    
+    environment {
+        DOCKER_IMAGE = "node${params.TARGET_ENV}:${params.IMAGE_TAG}"
+        PORT = "${params.TARGET_ENV == 'main' ? '3000' : '3001'}"
+    }
+    
+    stages {
+        stage('Stop Existing Containers') {
+            steps {
+                script {
+                    sh "docker ps -q --filter ancestor=${env.DOCKER_IMAGE} | xargs -r docker stop | xargs -r docker rm || true"
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                script {
+                    sh "docker run -d -p ${env.PORT}:${env.PORT} -e PORT=${env.PORT} ${env.DOCKER_IMAGE}"
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "Application deployed to ${params.TARGET_ENV} environment on port ${env.PORT}"
+        }
+    }
+}
