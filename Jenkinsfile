@@ -8,7 +8,6 @@ pipeline {
     environment {
         DOCKER_IMAGE = "${BRANCH_NAME == 'main' ? 'nodemain' : 'nodedev'}:v1.0"
         PORT = "${BRANCH_NAME == 'main' ? '3000' : '3001'}"
-        ACTIVE_LOGO = "${BRANCH_NAME == 'main' ? 'src/logo.svg' : 'src/logo2.svg'}"
         CONTAINER_NAME = "${env.DOCKER_IMAGE.replace(':', '_')}" 
     }
     
@@ -35,7 +34,7 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${env.DOCKER_IMAGE} --build-arg LOGO_FILE=${env.ACTIVE_LOGO} ."
+                sh "docker build -t ${env.DOCKER_IMAGE} ."
             }
         }
         
@@ -61,7 +60,6 @@ pipeline {
     post {
         always {
             echo "Deployed ${env.DOCKER_IMAGE} on port ${env.PORT}"
-            echo "Using logo: ${env.ACTIVE_LOGO}"
         }
     }
 }
